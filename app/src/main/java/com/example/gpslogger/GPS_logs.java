@@ -24,7 +24,9 @@ public class GPS_logs extends FragmentActivity implements OnMapReadyCallback {
         setContentView(R.layout.activity_gps_logs);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
     }
 
     @Override
@@ -34,8 +36,11 @@ public class GPS_logs extends FragmentActivity implements OnMapReadyCallback {
         Intent intent = getIntent();
         ArrayList<LatLng> markersArray = intent.getParcelableArrayListExtra(MainActivity.MARKERS_ARRAY);
         System.out.println("In map");
+        if (markersArray == null) {
+            return;
+        }
         if(!markersArray.isEmpty()){
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(markersArray.get(0)));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markersArray.get(0), 17.0f));
         }
         for(LatLng pos : markersArray){
             System.out.println("Marker added");

@@ -35,17 +35,11 @@
 
         <activity
             android:name=".GPS_logs"
+            android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_gps_logs">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.gpslogger.MainActivity" />
-        </activity>
-        <activity
-            android:name=".DisplayMessageActivity"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
         </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
