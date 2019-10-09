@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -64,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     private final static String KEY_LOCATION = "location";
     private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
-    public static final String EXTRA_MESSAGE = "My GPS Logger app";
     public static final String MARKERS_ARRAY = "markersArray";
     private static final String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private FusedLocationProviderClient mFusedLocationClient;
+
+    private String[] PATHS = null;
 
     private SettingsClient mSettingsClient;
 
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     // UI Widgets.
     private Button mStartUpdatesButton;
     private Button mStopUpdatesButton;
+    private Button mViewMapButton;
     private TextView mSpeedTextView;
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
@@ -103,9 +106,17 @@ public class MainActivity extends AppCompatActivity {
 
         mStartUpdatesButton = findViewById(R.id.button_start);
         mStopUpdatesButton = findViewById(R.id.button_stop);
+        mViewMapButton = findViewById(R.id.button_view_map);
         mLatitudeTextView = findViewById(R.id.lat_value);
         mLongitudeTextView = findViewById(R.id.long_value);
         mSpeedTextView = findViewById(R.id.speed_value);
+        mViewMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onViewMap(view);
+            }
+        });
+
 
 
         mRequestingLocationUpdates = false;
@@ -182,6 +193,12 @@ public class MainActivity extends AppCompatActivity {
                     updateUI();
                     break;
             }
+        }
+        else if(requestCode == 7){
+            String PathHolder = Objects.requireNonNull(data.getData()).getPath();
+            PATHS = PathHolder.split(":");
+            System.out.println(PATHS[1]);
+            Toast.makeText(MainActivity.this, PATHS[1] , Toast.LENGTH_LONG).show();
         }
     }
 
@@ -464,15 +481,9 @@ public class MainActivity extends AppCompatActivity {
         return markersArray;
     }
 
-
-
-    public void onViewMap(View view) {
-        stopLocationUpdates();
+    private void openMap(){
         ArrayList<LatLng> markersArray = new ArrayList<LatLng>();
-        String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "GPSLogger";
-        File dir = new File(baseDir);
-        String fileName = "Analysis.csv";
-        String csvFilename = dir + File.separator + fileName;
+        String csvFilename = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + PATHS[1];
         CSVReader csvReader = null;
         String[] pos;
         List content = null;
@@ -493,14 +504,24 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        Fragment fragment = new Fragment(R.layout.activity_gps_logs);
-//        Bundle bundle = new Bundle();
-//        bundle.putSerializable(MARKERS_ARRAY,markersArray);
-//        fragment.setArguments(bundle);
         Intent intent = new Intent(MainActivity.this, GPS_logs.class);
         intent.putExtra(MARKERS_ARRAY, markersArray);
-//        intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
-//        intent.putExtra(MARKERS_ARRAY, markersArray);
         startActivity(intent);
+
+    }
+
+
+    public void onViewMap(View view) {
+        stopLocationUpdates();
+        Intent intent2 = new Intent(Intent.ACTION_GET_CONTENT);
+        intent2.setType("*/*");
+        startActivityForResult(intent2, 7);
+        while(!PATHS[1].endsWith(".csv")){
+            Toast.makeText(MainActivity.this, "Please select a valid CSV file", Toast.LENGTH_LONG).show();
+            startActivityForResult(intent2, 7);
+        }
+        if(PATHS != null) {
+            openMap();
+        }
     }
 }
