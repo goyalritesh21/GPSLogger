@@ -14,6 +14,7 @@
         android:layout_marginEnd="16dp"
         android:gravity="center"
         android:hint="@string/text_lat"
+        android:textAlignment="textStart"
         app:layout_constraintBaseline_toBaselineOf="@+id/lat_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -27,6 +28,7 @@
         android:layout_marginEnd="16dp"
         android:gravity="center"
         android:hint="@string/text_speed"
+        android:textAlignment="textStart"
         app:layout_constraintBaseline_toBaselineOf="@+id/speed_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -40,6 +42,7 @@
         android:layout_marginEnd="16dp"
         android:gravity="center"
         android:hint="@string/text_long"
+        android:textAlignment="textStart"
         app:layout_constraintBaseline_toBaselineOf="@+id/long_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -49,15 +52,15 @@
         android:id="@+id/lat_label"
         android:layout_width="110dp"
         android:layout_height="30dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:gravity="center"
         android:text="@string/label_lat"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
         app:layout_constraintBottom_toTopOf="@+id/long_label"
         app:layout_constraintEnd_toStartOf="@+id/lat_value"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
         android:id="@+id/button_view_map"
@@ -87,10 +90,10 @@
         android:id="@+id/speed_label"
         android:layout_width="110dp"
         android:layout_height="30dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:gravity="center"
         android:text="@string/label_speed"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
         app:layout_constraintBottom_toTopOf="@+id/button_start"
         app:layout_constraintEnd_toStartOf="@+id/speed_value"
         app:layout_constraintHorizontal_bias="0.5"
@@ -102,10 +105,10 @@
         android:id="@+id/long_label"
         android:layout_width="110dp"
         android:layout_height="30dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:gravity="center"
         android:text="@string/label_long"
-        android:textAlignment="center"
+        android:textAlignment="textStart"
         app:layout_constraintBottom_toTopOf="@+id/speed_label"
         app:layout_constraintEnd_toStartOf="@+id/long_value"
         app:layout_constraintHorizontal_bias="0.5"
@@ -124,5 +127,49 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/button_start" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="110dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/label_fileName"
+        android:textAlignment="textStart"
+        app:layout_constraintEnd_toStartOf="@+id/dataFileName"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/dataFileName"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:ems="10"
+        android:fontFamily="More Fonts..."
+        android:inputType="textPersonName"
+        android:text="@string/fileName_value"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintEnd_toStartOf="@+id/textView2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"
+        android:text=".csv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/dataFileName"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

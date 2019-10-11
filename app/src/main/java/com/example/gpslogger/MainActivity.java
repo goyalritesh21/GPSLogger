@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
+import com.nbsp.materialfilepicker.MaterialFilePicker;
+import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
@@ -50,7 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -75,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient mFusedLocationClient;
 
-    private String[] PATHS = null;
+//    private String[] PATHS = null;
 
     private SettingsClient mSettingsClient;
 
@@ -90,10 +93,10 @@ public class MainActivity extends AppCompatActivity {
     // UI Widgets.
     private Button mStartUpdatesButton;
     private Button mStopUpdatesButton;
-    private Button mViewMapButton;
     private TextView mSpeedTextView;
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
+    private EditText mFileName;
 
     private Boolean mRequestingLocationUpdates;
 
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
 
         mStartUpdatesButton = findViewById(R.id.button_start);
         mStopUpdatesButton = findViewById(R.id.button_stop);
-        mViewMapButton = findViewById(R.id.button_view_map);
+        Button mViewMapButton = findViewById(R.id.button_view_map);
         mLatitudeTextView = findViewById(R.id.lat_value);
         mLongitudeTextView = findViewById(R.id.long_value);
         mSpeedTextView = findViewById(R.id.speed_value);
@@ -116,8 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 onViewMap(view);
             }
         });
-
-
+        mFileName = findViewById(R.id.dataFileName);
 
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
@@ -194,11 +196,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
-        else if(requestCode == 7){
-            String PathHolder = Objects.requireNonNull(data.getData()).getPath();
-            PATHS = PathHolder.split(":");
-            System.out.println(PATHS[1]);
-            Toast.makeText(MainActivity.this, PATHS[1] , Toast.LENGTH_LONG).show();
+        else if(requestCode == 7 && resultCode == RESULT_OK){
+            String filePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
+//            String PathHolder = Objects.requireNonNull(data.getData()).getPath();
+//            PATHS = PathHolder.split(":");
+//            System.out.println(PATHS[1]);
+            Toast.makeText(MainActivity.this, "Opening File " + filePath + " on Map" , Toast.LENGTH_LONG).show();
+            openMap(filePath);
         }
     }
 
@@ -262,11 +266,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void setButtonsEnabledState() {
         if (mRequestingLocationUpdates) {
+            mFileName.setEnabled(false);
             mStartUpdatesButton.setEnabled(false);
             mStopUpdatesButton.setEnabled(true);
         } else {
             mStartUpdatesButton.setEnabled(true);
             mStopUpdatesButton.setEnabled(false);
+            mFileName.setEnabled(true);
         }
     }
 
@@ -283,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
             if(!dir.exists()){
                 dir.mkdirs();
             }
-            String fileName = "Analysis.csv";
+            String fileName = mFileName.getText().toString() + ".csv";
             String filePath = dir + File.separator + fileName;
             File f = new File(filePath);
             CSVWriter writer = null;
@@ -311,6 +317,7 @@ public class MainActivity extends AppCompatActivity {
             String[] data = {latitude, longitude, speed};
 
             try {
+                assert writer != null;
                 writer.writeNext(data);
                 writer.close();
             } catch (Exception e) {
@@ -338,7 +345,8 @@ public class MainActivity extends AppCompatActivity {
         if(!dir.exists()){
             dir.mkdirs();
         }
-        String fileName = "Analysis.csv";
+
+        String fileName = mFileName.getText().toString() + ".csv";
         String filePath = dir + File.separator + fileName;
         String message = "File strored at " + filePath;
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
@@ -453,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public ArrayList<LatLng> getMapMarkers(){
-        ArrayList<LatLng> markersArray = new ArrayList<LatLng>();
+        ArrayList<LatLng> markersArray = new ArrayList<>();
         String baseDir = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "GPSLogger";
         File dir = new File(baseDir);
         String fileName = "Analysis.csv";
@@ -468,6 +476,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         int i = 0;
+        assert content != null;
         for (Object object : content) {
             if(i++ == 0) continue;
             pos = (String[]) object;
@@ -481,9 +490,8 @@ public class MainActivity extends AppCompatActivity {
         return markersArray;
     }
 
-    private void openMap(){
+    private void openMap(String csvFilename){
         ArrayList<LatLng> markersArray = new ArrayList<LatLng>();
-        String csvFilename = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + PATHS[1];
         CSVReader csvReader = null;
         String[] pos;
         List content = null;
@@ -494,11 +502,18 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         int i = 0;
-        for (Object object : content) {
-            if(i++ == 0) continue;
-            pos = (String[]) object;
-            markersArray.add(new LatLng(Double.parseDouble(pos[0]), Double.parseDouble(pos[1])));
+        try {
+            assert content != null;
+            for (Object object : content) {
+                if(i++ == 0) continue;
+                pos = (String[]) object;
+                markersArray.add(new LatLng(Double.parseDouble(pos[0]), Double.parseDouble(pos[1])));
+            }
         }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
+
         try {
             csvReader.close();
         } catch (IOException e) {
@@ -513,15 +528,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void onViewMap(View view) {
         stopLocationUpdates();
-        Intent intent2 = new Intent(Intent.ACTION_GET_CONTENT);
-        intent2.setType("*/*");
-        startActivityForResult(intent2, 7);
-        while(!PATHS[1].endsWith(".csv")){
-            Toast.makeText(MainActivity.this, "Please select a valid CSV file", Toast.LENGTH_LONG).show();
-            startActivityForResult(intent2, 7);
-        }
-        if(PATHS != null) {
-            openMap();
-        }
+        new MaterialFilePicker()
+                .withActivity(this)
+                .withRequestCode(7)
+                .withFilter(Pattern.compile(".*\\.csv$")) // Filtering files and directories by file name using regexp
+                .withHiddenFiles(true) // Show hidden files and folders
+                .start();
     }
 }

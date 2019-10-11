@@ -21,4 +21,6 @@
         functionality.</string>
     <string name="settings">Settings</string>
     <string name="title_activity_gps_logs">Map</string>
+    <string name="label_fileName">File Name: </string>
+    <string name="fileName_value">Analysis_Data</string>
 </resources>
